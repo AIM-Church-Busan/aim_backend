@@ -9,7 +9,7 @@ class EventRegistration extends Model
 {
     protected $fillable = [
         'event_id',
-        'user_id',
+        'planning_center_user_id',
         'status',
     ];
 
@@ -29,9 +29,9 @@ class EventRegistration extends Model
         return $this->belongsTo(Event::class);
     }
 
-    public function user(): BelongsTo
+    public function planningCenterUser(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(PlanningCenterUser::class);
     }
 
     // ─── Scopes ───────────────────────────────────────────────────
