@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\PlanningCenterUser;
 use App\Services\EventLikeService;
 use Illuminate\Http\JsonResponse;
 
@@ -19,7 +20,9 @@ class EventLikeController extends Controller
      */
     public function toggle(Event $event): JsonResponse
     {
-        $liked = $this->eventLikeService->toggleLike($event, auth()->id());
+        $planningCenterUser = PlanningCenterUser::where('planning_center_id', auth()->user()->planning_center_id)->firstOrFail();
+
+        $liked = $this->eventLikeService->toggleLike($event, $planningCenterUser->id);
 
         return response()->json([
             'liked'      => $liked,
