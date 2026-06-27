@@ -13,11 +13,11 @@ class EventRegistrationService
      * Register a user for an event.
      * Decrements remaining_spots within a transaction to prevent race conditions.
      */
-    public function register(Event $event, int $userId): EventRegistration
+    public function register(Event $event, int $planningCenterUserId): EventRegistration
     {
         // Check if already registered
         $existing = EventRegistration::where('event_id', $event->id)
-            ->where('user_id', $userId)
+            ->where('planning_center_user_id', $planningCenterUserId)
             ->first();
 
         if ($existing && !$existing->isCancelled()) {
@@ -33,7 +33,7 @@ class EventRegistrationService
             ]);
         }
 
-        return DB::transaction(function () use ($event, $userId, $existing) {
+        return DB::transaction(function () use ($event, $planningCenterUserId, $existing) {
             // Decrement remaining_spots if capacity is set
             if (!is_null($event->remaining_spots)) {
                 $updated = Event::where('id', $event->id)
@@ -54,9 +54,9 @@ class EventRegistrationService
             }
 
             return EventRegistration::create([
-                'event_id' => $event->id,
-                'user_id'  => $userId,
-                'status'   => EventRegistration::STATUS_CONFIRMED,
+                'event_id'                => $event->id,
+                'planning_center_user_id' => $planningCenterUserId,
+                'status'                  => EventRegistration::STATUS_CONFIRMED,
             ]);
         });
     }
@@ -65,10 +65,10 @@ class EventRegistrationService
      * Cancel a user's registration for an event.
      * Increments remaining_spots back.
      */
-    public function cancel(Event $event, int $userId): void
+    public function cancel(Event $event, int $planningCenterUserId): void
     {
         $registration = EventRegistration::where('event_id', $event->id)
-            ->where('user_id', $userId)
+            ->where('planning_center_user_id', $planningCenterUserId)
             ->firstOrFail();
 
         if ($registration->isCancelled()) {
@@ -90,10 +90,10 @@ class EventRegistrationService
     /**
      * Check if a user is registered for an event.
      */
-    public function isRegistered(Event $event, int $userId): bool
+    public function isRegistered(Event $event, int $planningCenterUserId): bool
     {
         return EventRegistration::where('event_id', $event->id)
-            ->where('user_id', $userId)
+            ->where('planning_center_user_id', $planningCenterUserId)
             ->where('status', '!=', EventRegistration::STATUS_CANCELLED)
             ->exists();
     }

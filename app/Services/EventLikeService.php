@@ -11,10 +11,10 @@ class EventLikeService
      * Toggle like for an event.
      * Returns true if liked, false if unliked.
      */
-    public function toggleLike(Event $event, int $userId): bool
+    public function toggleLike(Event $event, int $planningCenterUserId): bool
     {
         $like = EventLike::where('event_id', $event->id)
-            ->where('user_id', $userId)
+            ->where('planning_center_user_id', $planningCenterUserId)
             ->first();
 
         if ($like) {
@@ -23,8 +23,8 @@ class EventLikeService
         }
 
         EventLike::create([
-            'event_id' => $event->id,
-            'user_id'  => $userId,
+            'event_id'                => $event->id,
+            'planning_center_user_id' => $planningCenterUserId,
         ]);
 
         return true;
@@ -33,10 +33,10 @@ class EventLikeService
     /**
      * Check if a user has liked an event.
      */
-    public function isLiked(Event $event, int $userId): bool
+    public function isLiked(Event $event, int $planningCenterUserId): bool
     {
         return EventLike::where('event_id', $event->id)
-            ->where('user_id', $userId)
+            ->where('planning_center_user_id', $planningCenterUserId)
             ->exists();
     }
 
