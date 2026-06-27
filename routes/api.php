@@ -19,3 +19,10 @@ Route::middleware('auth:sanctum')->prefix('events')->group(function () {
     Route::post('/{event}/register', [EventRegistrationController::class, 'store']);
     Route::delete('/{event}/register', [EventRegistrationController::class, 'cancel']);
 });
+
+// ─── Announcements ────────────────────────────────────────────────────────────
+
+Route::prefix('announcements')->group(function () {
+    Route::get('/', [AnnouncementController::class, 'index']);
+    Route::get('/{announcement}', [AnnouncementController::class, 'show']);
+});
