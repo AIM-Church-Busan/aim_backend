@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEventRegistrationRequest;
 use App\Models\Event;
+use App\Models\PlanningCenterUser;
 use App\Services\EventRegistrationService;
 use Illuminate\Http\JsonResponse;
 
@@ -20,7 +21,9 @@ class EventRegistrationController extends Controller
      */
     public function store(StoreEventRegistrationRequest $request, Event $event): JsonResponse
     {
-        $registration = $this->eventRegistrationService->register($event, auth()->id());
+        $planningCenterUser = PlanningCenterUser::where('planning_center_id', auth()->user()->planning_center_id)->firstOrFail();
+
+        $registration = $this->eventRegistrationService->register($event, $planningCenterUser->id);
 
         return response()->json([
             'message'      => 'Successfully registered for the event.',
@@ -34,7 +37,9 @@ class EventRegistrationController extends Controller
      */
     public function cancel(Event $event): JsonResponse
     {
-        $this->eventRegistrationService->cancel($event, auth()->id());
+        $planningCenterUser = PlanningCenterUser::where('planning_center_id', auth()->user()->planning_center_id)->firstOrFail();
+
+        $this->eventRegistrationService->cancel($event, $planningCenterUser->id);
 
         return response()->json([
             'message' => 'Registration successfully cancelled.',

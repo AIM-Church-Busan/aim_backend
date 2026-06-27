@@ -11,7 +11,7 @@ class EventLike extends Model
 
     protected $fillable = [
         'event_id',
-        'user_id',
+        'planning_center_user_id',
     ];
 
     protected $casts = [
@@ -25,8 +25,8 @@ class EventLike extends Model
         return $this->belongsTo(Event::class);
     }
 
-    public function user(): BelongsTo
+    public function planningCenterUser(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(PlanningCenterUser::class);
     }
 }
