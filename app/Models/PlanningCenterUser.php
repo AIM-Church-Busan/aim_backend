@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Sanctum\HasApiTokens;  // 이게 빠진 것!
 
 class PlanningCenterUser extends Model
 {
+    use HasApiTokens;
+
     protected $fillable = [
         'planning_center_id',
         'name',
@@ -19,8 +22,6 @@ class PlanningCenterUser extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
-
-    // ─── Relationships ────────────────────────────────────────────
 
     public function lifeGroups(): HasMany
     {
@@ -37,19 +38,11 @@ class PlanningCenterUser extends Model
         return $this->hasMany(EventRegistration::class);
     }
 
-    // ─── Helpers ──────────────────────────────────────────────────
-
-    /**
-     * Check if the user is a leader in any Life Group.
-     */
     public function isLifeGroupLeader(): bool
     {
         return $this->lifeGroups()->where('role', 'leader')->exists();
     }
 
-    /**
-     * Get the user's Life Group names.
-     */
     public function getLifeGroupNamesAttribute(): array
     {
         return $this->lifeGroups->pluck('life_group_name')->toArray();

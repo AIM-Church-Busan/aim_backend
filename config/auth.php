@@ -42,6 +42,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'planning_center' => [
+                'driver'   => 'session',
+                'provider' => 'planning_center_users',
+        ],
     ],
 
     /*
@@ -65,6 +69,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'planning_center_users' => [
+                'driver' => 'eloquent',
+                'model'  => App\Models\PlanningCenterUser::class,
         ],
 
         // 'users' => [
