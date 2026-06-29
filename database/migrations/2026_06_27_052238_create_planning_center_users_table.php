@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('planning_center_users', function (Blueprint $table) {
             $table->id();
             $table->string('planning_center_id')->unique()->comment('Planning Center OAuth 고유 ID');
-            $table->string('name');
+            $table->string('name')->nullable();
             $table->string('email')->nullable();
             $table->string('avatar_url')->nullable();
             $table->string('role')->default('user')->comment('user | admin');

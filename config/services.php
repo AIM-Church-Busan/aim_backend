@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'planning-center' => [
+        'client_id'     => env('PLANNING_CENTER_CLIENT_ID'),
+        'client_secret' => env('PLANNING_CENTER_CLIENT_SECRET'),
+        'redirect'      => env('PLANNING_CENTER_REDIRECT_URI'),
+    ],
+
 ];
