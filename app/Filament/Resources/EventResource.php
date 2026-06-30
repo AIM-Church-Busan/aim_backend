@@ -15,14 +15,9 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class EventResource extends Resource
 {
     protected static ?string $model = Event::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-
     protected static ?string $navigationLabel = 'Events';
-
     protected static ?int $navigationSort = 1;
-
-    // ─── Form ─────────────────────────────────────────────────────
 
     public static function form(Form $form): Form
     {
@@ -32,7 +27,11 @@ class EventResource extends Resource
                     Forms\Components\TextInput::make('title')
                         ->required()
                         ->maxLength(255)
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->validationMessages([
+                            'required' => 'Please enter a title.',
+                            'max'      => 'Title may not be greater than 255 characters.',
+                        ]),
 
                     Forms\Components\RichEditor::make('description')
                         ->columnSpanFull(),
@@ -43,11 +42,17 @@ class EventResource extends Resource
                 ->schema([
                     Forms\Components\DatePicker::make('starts_at')
                         ->required()
-                        ->label('Start Date'),
+                        ->label('Start Date')
+                        ->validationMessages([
+                            'required' => 'Please select a start date.',
+                        ]),
 
                     Forms\Components\DatePicker::make('ends_at')
                         ->label('End Date')
-                        ->after('starts_at'),
+                        ->after('starts_at')
+                        ->validationMessages([
+                            'after' => 'End date must be after the start date.',
+                        ]),
 
                     Forms\Components\TimePicker::make('start_time')
                         ->label('Start Time')
@@ -56,7 +61,10 @@ class EventResource extends Resource
                     Forms\Components\TimePicker::make('end_time')
                         ->label('End Time')
                         ->seconds(false)
-                        ->after('start_time'),
+                        ->after('start_time')
+                        ->validationMessages([
+                            'after' => 'End time must be after the start time.',
+                        ]),
 
                     Forms\Components\DatePicker::make('due_date')
                         ->label('Due Date')
@@ -104,7 +112,10 @@ class EventResource extends Resource
                         ->url()
                         ->maxLength(255)
                         ->visible(fn (Forms\Get $get) => $get('thumbnail_type') === 'url')
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->validationMessages([
+                            'url' => 'Please enter a valid URL.',
+                        ]),
                 ])
                 ->columns(2),
 
@@ -114,7 +125,11 @@ class EventResource extends Resource
                         ->label('Max Capacity')
                         ->numeric()
                         ->minValue(1)
-                        ->helperText('Leave empty for unlimited.'),
+                        ->helperText('Leave empty for unlimited.')
+                        ->validationMessages([
+                            'numeric' => 'Capacity must be a number.',
+                            'min'     => 'Capacity must be at least 1.',
+                        ]),
 
                     Forms\Components\TextInput::make('remaining_spots')
                         ->label('Remaining Spots')
@@ -126,7 +141,11 @@ class EventResource extends Resource
                         ->label('External Link')
                         ->url()
                         ->maxLength(255)
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->validationMessages([
+                            'url' => 'Please enter a valid URL.',
+                            'max' => 'Link may not be greater than 255 characters.',
+                        ]),
                 ])
                 ->columns(2),
 
@@ -138,8 +157,6 @@ class EventResource extends Resource
                 ]),
         ]);
     }
-
-    // ─── Table ────────────────────────────────────────────────────
 
     public static function table(Table $table): Table
     {
@@ -205,8 +222,6 @@ class EventResource extends Resource
                 ]),
             ]);
     }
-
-    // ─── Pages ────────────────────────────────────────────────────
 
     public static function getRelations(): array
     {

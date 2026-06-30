@@ -14,14 +14,9 @@ use Illuminate\Database\Eloquent\Builder;
 class AnnouncementResource extends Resource
 {
     protected static ?string $model = Announcement::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';
-
     protected static ?string $navigationLabel = 'Announcements';
-
     protected static ?int $navigationSort = 2;
-
-    // ─── Form ─────────────────────────────────────────────────────
 
     public static function form(Form $form): Form
     {
@@ -31,7 +26,11 @@ class AnnouncementResource extends Resource
                     Forms\Components\TextInput::make('title')
                         ->required()
                         ->maxLength(255)
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->validationMessages([
+                            'required' => 'Please enter a title.',
+                            'max'      => 'Title may not be greater than 255 characters.',
+                        ]),
 
                     Forms\Components\RichEditor::make('description')
                         ->columnSpanFull(),
@@ -39,7 +38,10 @@ class AnnouncementResource extends Resource
                     Forms\Components\Select::make('category')
                         ->required()
                         ->options(Announcement::CATEGORIES)
-                        ->default(Announcement::CATEGORY_GENERAL),
+                        ->default(Announcement::CATEGORY_GENERAL)
+                        ->validationMessages([
+                            'required' => 'Please select a category.',
+                        ]),
                 ])
                 ->columns(2),
 
@@ -47,11 +49,17 @@ class AnnouncementResource extends Resource
                 ->schema([
                     Forms\Components\DatePicker::make('starts_at')
                         ->required()
-                        ->label('Start Date'),
+                        ->label('Start Date')
+                        ->validationMessages([
+                            'required' => 'Please select a start date.',
+                        ]),
 
                     Forms\Components\DatePicker::make('ends_at')
                         ->label('End Date')
-                        ->after('starts_at'),
+                        ->after('starts_at')
+                        ->validationMessages([
+                            'after' => 'End date must be after the start date.',
+                        ]),
 
                     Forms\Components\TimePicker::make('start_time')
                         ->label('Start Time')
@@ -60,7 +68,10 @@ class AnnouncementResource extends Resource
                     Forms\Components\TimePicker::make('end_time')
                         ->label('End Time')
                         ->seconds(false)
-                        ->after('start_time'),
+                        ->after('start_time')
+                        ->validationMessages([
+                            'after' => 'End time must be after the start time.',
+                        ]),
 
                     Forms\Components\DatePicker::make('due_date')
                         ->label('Due Date')
@@ -108,7 +119,10 @@ class AnnouncementResource extends Resource
                         ->url()
                         ->maxLength(255)
                         ->visible(fn (Forms\Get $get) => $get('thumbnail_type') === 'url')
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->validationMessages([
+                            'url' => 'Please enter a valid URL.',
+                        ]),
                 ])
                 ->columns(2),
 
@@ -130,8 +144,6 @@ class AnnouncementResource extends Resource
                 ->columns(2),
         ]);
     }
-
-    // ─── Table ────────────────────────────────────────────────────
 
     public static function table(Table $table): Table
     {
@@ -203,8 +215,6 @@ class AnnouncementResource extends Resource
                 ]),
             ]);
     }
-
-    // ─── Pages ────────────────────────────────────────────────────
 
     public static function getRelations(): array
     {
