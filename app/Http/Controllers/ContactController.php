@@ -22,7 +22,7 @@ class ContactController extends Controller
         // Inquiry::create($validated);
 
         // 2. 문의자에게 감사 메일 발송
-        Mail::to($validated['email'])->send(new GenericMail(
+        Mail::to($validated['email'])->queue(new GenericMail(
             $validated['name'],
             'Thank you for reaching out to us.<br><br>We have received your message and our team will get back to you as soon as possible.',
             'Visit Our Website',
@@ -30,7 +30,7 @@ class ContactController extends Controller
         ));
 
         // 3. 교회 스태프에게 알림 메일 발송
-        Mail::to(config('mail.church_contact_email'))->send(new NewInquiryNotification(
+        Mail::to(config('mail.church_contact_email'))->queue(new NewInquiryNotification(
             $validated['name'],
             $validated['email'],
             $validated['phone'] ?? null,
