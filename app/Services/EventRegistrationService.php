@@ -9,13 +9,8 @@ use Illuminate\Validation\ValidationException;
 
 class EventRegistrationService
 {
-    /**
-     * Register a user for an event.
-     * Decrements remaining_spots within a transaction to prevent race conditions.
-     */
     public function register(Event $event, int $planningCenterUserId): EventRegistration
     {
-        // Check if already registered
         $existing = EventRegistration::where('event_id', $event->id)
             ->where('planning_center_user_id', $planningCenterUserId)
             ->first();
@@ -26,7 +21,6 @@ class EventRegistrationService
             ]);
         }
 
-        // Check if event is full
         if ($event->is_full) {
             throw ValidationException::withMessages([
                 'event_id' => 'This event is fully booked.',
@@ -34,7 +28,6 @@ class EventRegistrationService
         }
 
         return DB::transaction(function () use ($event, $planningCenterUserId, $existing) {
-            // Decrement remaining_spots if capacity is set
             if (!is_null($event->remaining_spots)) {
                 $updated = Event::where('id', $event->id)
                     ->where('remaining_spots', '>', 0)
@@ -47,24 +40,19 @@ class EventRegistrationService
                 }
             }
 
-            // Re-register if previously cancelled
             if ($existing?->isCancelled()) {
-                $existing->update(['status' => EventRegistration::STATUS_CONFIRMED]);
+                $existing->update(['status' => EventRegistration::STATUS_REGISTERED]);
                 return $existing->fresh();
             }
 
             return EventRegistration::create([
                 'event_id'                => $event->id,
                 'planning_center_user_id' => $planningCenterUserId,
-                'status'                  => EventRegistration::STATUS_CONFIRMED,
+                'status'                  => EventRegistration::STATUS_REGISTERED,
             ]);
         });
     }
 
-    /**
-     * Cancel a user's registration for an event.
-     * Increments remaining_spots back.
-     */
     public function cancel(Event $event, int $planningCenterUserId): void
     {
         $registration = EventRegistration::where('event_id', $event->id)
@@ -80,16 +68,12 @@ class EventRegistrationService
         DB::transaction(function () use ($event, $registration) {
             $registration->update(['status' => EventRegistration::STATUS_CANCELLED]);
 
-            // Restore remaining_spots if capacity is set
             if (!is_null($event->remaining_spots)) {
                 $event->increment('remaining_spots');
             }
         });
     }
 
-    /**
-     * Check if a user is registered for an event.
-     */
     public function isRegistered(Event $event, int $planningCenterUserId): bool
     {
         return EventRegistration::where('event_id', $event->id)
