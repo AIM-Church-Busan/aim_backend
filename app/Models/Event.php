@@ -40,6 +40,17 @@ class Event extends Model
         'remaining_spots' => 'integer',
     ];
 
+    // ─── Model Events ───────────────────────────────────────────
+
+    protected static function booted(): void
+    {
+        static::creating(function (Event $event) {
+            if (!is_null($event->capacity) && is_null($event->remaining_spots)) {
+                $event->remaining_spots = $event->capacity;
+            }
+        });
+    }
+
     // ─── Relationships ────────────────────────────────────────────
 
     public function likes(): HasMany
