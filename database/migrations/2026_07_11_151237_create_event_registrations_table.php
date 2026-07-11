@@ -15,9 +15,10 @@ return new class extends Migration
                 ->constrained('planning_center_users')
                 ->cascadeOnDelete();
 
+            $table->string('status')->default('not_registered')->comment('not_registered | registered | cancelled');
+
             $table->timestamps();
 
-            // 같은 유저가 같은 이벤트에 중복 등록하는 것 방지
             $table->unique(['event_id', 'planning_center_user_id']);
         });
     }
