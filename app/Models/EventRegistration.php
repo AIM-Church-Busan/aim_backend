@@ -18,9 +18,9 @@ class EventRegistration extends Model
         'updated_at' => 'datetime',
     ];
 
-    const STATUS_PENDING   = 'pending';
-    const STATUS_CONFIRMED = 'confirmed';
-    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_NOT_REGISTERED = 'not_registered';
+    const STATUS_REGISTERED     = 'registered';
+    const STATUS_CANCELLED      = 'cancelled';
 
     // ─── Relationships ────────────────────────────────────────────
 
@@ -36,14 +36,14 @@ class EventRegistration extends Model
 
     // ─── Scopes ───────────────────────────────────────────────────
 
-    public function scopePending($query)
+    public function scopeNotRegistered($query)
     {
-        return $query->where('status', self::STATUS_PENDING);
+        return $query->where('status', self::STATUS_NOT_REGISTERED);
     }
 
-    public function scopeConfirmed($query)
+    public function scopeRegistered($query)
     {
-        return $query->where('status', self::STATUS_CONFIRMED);
+        return $query->where('status', self::STATUS_REGISTERED);
     }
 
     public function scopeCancelled($query)
@@ -53,14 +53,14 @@ class EventRegistration extends Model
 
     // ─── Helpers ──────────────────────────────────────────────────
 
-    public function isPending(): bool
+    public function isNotRegistered(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === self::STATUS_NOT_REGISTERED;
     }
 
-    public function isConfirmed(): bool
+    public function isRegistered(): bool
     {
-        return $this->status === self::STATUS_CONFIRMED;
+        return $this->status === self::STATUS_REGISTERED;
     }
 
     public function isCancelled(): bool
