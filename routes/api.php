@@ -52,4 +52,5 @@ Route::prefix('sermons')->group(function () {
 // ─── YouTube PubSubHubbub Webhook ──────────────────────────────────────────
 // No session/CSRF needed — server-to-server callback from Google's hub.
 
-Route::match(['get', 'post'], 'youtube/webhook', [YoutubeWebhookController::class, 'handle']);
+Route::match(['get', 'post'], 'youtube/webhook', [YoutubeWebhookController::class, 'handle'])
+    ->name('youtube.webhook');
