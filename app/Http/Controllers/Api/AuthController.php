@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PlanningCenterUser;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -34,20 +35,10 @@ class AuthController extends Controller
             ]
         );
 
-        // 기존 토큰 삭제 후 새 토큰 발급
-        $user->tokens()->delete();
-        $token = $user->createToken('planning-center-token')->plainTextToken;
+        Auth::guard('planning_center')->login($user);
+        $request->session()->regenerate();
 
-        return response()->json([
-            'token' => $token,
-            'user'  => [
-                'id'         => $user->id,
-                'name'       => $user->name,
-                'email'      => $user->email,
-                'avatar_url' => $user->avatar_url,
-                'role'       => $user->role,
-            ],
-        ]);
+        return redirect(config('app.frontend_url'));
     }
 
     // POST /api/auth/logout

@@ -21,7 +21,8 @@ class EventRegistrationController extends Controller
      */
     public function store(StoreEventRegistrationRequest $request, Event $event): JsonResponse
     {
-        $planningCenterUser = PlanningCenterUser::where('planning_center_id', auth()->user()->planning_center_id)->firstOrFail();
+        /** @var PlanningCenterUser $planningCenterUser */
+        $planningCenterUser = auth()->user();
 
         $registration = $this->eventRegistrationService->register($event, $planningCenterUser->id);
 
@@ -37,7 +38,8 @@ class EventRegistrationController extends Controller
      */
     public function cancel(Event $event): JsonResponse
     {
-        $planningCenterUser = PlanningCenterUser::where('planning_center_id', auth()->user()->planning_center_id)->firstOrFail();
+        /** @var PlanningCenterUser $planningCenterUser */
+        $planningCenterUser = auth()->user();
 
         $this->eventRegistrationService->cancel($event, $planningCenterUser->id);
 
