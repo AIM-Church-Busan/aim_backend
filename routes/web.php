@@ -1,9 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::prefix('api/auth')->group(function () {
+    Route::get('planning-center/redirect', [AuthController::class, 'redirect']);
+    Route::get('planning-center/callback', [AuthController::class, 'callback']);
 });
 
 Route::get('/test-mail-preview', function () {

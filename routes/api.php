@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Route;
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 Route::prefix('auth')->group(function () {
-    Route::get('planning-center/redirect', [AuthController::class, 'redirect']);
-    Route::get('planning-center/callback', [AuthController::class, 'callback']);
-
     Route::middleware('auth:planning_center')->group(function () {   // auth:sanctum → auth:planning_center
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
@@ -28,7 +25,7 @@ Route::prefix('events')->group(function () {
 
 // ─── Events (Authenticated) ───────────────────────────────────────────────────
 
-Route::middleware('auth:sanctum')->prefix('events')->group(function () {
+Route::middleware('auth:planning_center')->prefix('events')->group(function () {
     Route::post('/{event}/like', [EventLikeController::class, 'toggle']);
     Route::post('/{event}/register', [EventRegistrationController::class, 'store']);
     Route::delete('/{event}/register', [EventRegistrationController::class, 'cancel']);
