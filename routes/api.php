@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\EventLikeController;
 use App\Http\Controllers\Api\EventRegistrationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\SermonController;
+use App\Http\Controllers\Api\YoutubeWebhookController;
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -37,3 +39,17 @@ Route::prefix('announcements')->group(function () {
     Route::get('/', [AnnouncementController::class, 'index']);
     Route::get('/{announcement}', [AnnouncementController::class, 'show']);
 });
+
+// ─── Sermons (Public) ──────────────────────────────────────────────────────
+
+Route::prefix('sermons')->group(function () {
+    Route::get('/', [SermonController::class, 'index']);
+    Route::get('/live', [SermonController::class, 'live']);        // must come before /{id}
+    Route::get('/upcoming', [SermonController::class, 'upcoming']); // must come before /{id}
+    Route::get('/{id}', [SermonController::class, 'show']);
+});
+
+// ─── YouTube PubSubHubbub Webhook ──────────────────────────────────────────
+// No session/CSRF needed — server-to-server callback from Google's hub.
+
+Route::match(['get', 'post'], 'youtube/webhook', [YoutubeWebhookController::class, 'handle']);

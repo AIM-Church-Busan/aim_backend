@@ -10,13 +10,13 @@ use Illuminate\Support\Str;
 
 class SermonService
 {
-    private const ALL_CACHE_KEY      = 'sermons:all';
-    private const UPCOMING_CACHE_KEY = 'sermons:upcoming';
-    private const LIVE_CACHE_KEY     = 'sermons:live';
+    private const ALL_CACHE_KEY           = 'sermons:all';
+    private const UPCOMING_CACHE_KEY      = 'sermons:upcoming';
+    private const LIVE_CACHE_KEY          = 'sermons:live';
     private const NEXT_UPCOMING_CHECK_KEY = 'sermons:next_upcoming_check_at';
 
     // ══════════════════════════════════════════════════════════════
-    // 1. 영상 목록 — 폴링 없음. 웹훅이 캐시를 지울 때만 재조회됨.
+    // 1. Uploaded video list — no polling, invalidated only by webhook
     // ══════════════════════════════════════════════════════════════
 
     public function getSermons(int $page = 1, ?string $title = null, int $perPage = 12): LengthAwarePaginator
@@ -50,14 +50,13 @@ class SermonService
 
     private function getAllSermons(): Collection
     {
-        // TTL 없이(사실상 무기한) 유지 — 웹훅이 forget()으로만 무효화시킴
         return collect(Cache::rememberForever(
             self::ALL_CACHE_KEY,
             fn () => $this->fetchAllFromYoutube()->all()
         ));
     }
 
-    /** 웹훅 컨트롤러에서 새 영상 알림 수신 시 호출 */
+    /** Called by YoutubeWebhookController when YouTube notifies of a new/updated upload. */
     public function invalidateAllSermonsCache(): void
     {
         Cache::forget(self::ALL_CACHE_KEY);
@@ -80,7 +79,9 @@ class SermonService
 
             foreach ($response['items'] ?? [] as $item) {
                 $videoId = $item['contentDetails']['videoId'] ?? null;
-                if (!$videoId) continue;
+                if (!$videoId) {
+                    continue;
+                }
 
                 $videos->push([
                     'id'           => $videoId,
@@ -115,19 +116,17 @@ class SermonService
     }
 
     // ══════════════════════════════════════════════════════════════
-    // 2 & 4. Upcoming Live — 확보되면 고정 사용, 없으면 4시간 간격 재시도
+    // 2 & 4. Upcoming live broadcast — fetch once, reuse, retry every 4h if not found
     // ══════════════════════════════════════════════════════════════
 
     public function getUpcomingSermon(): ?array
     {
         $cached = Cache::get(self::UPCOMING_CACHE_KEY);
 
-        // 이미 확보된 upcoming이 있으면 그대로 반환, API 호출 없음
         if ($cached !== null) {
             return $cached['sermon'];
         }
 
-        // 아직 확보된 게 없을 때만, 재확인 시점(next_upcoming_check_at)이 됐는지 체크
         if (!$this->shouldCheckUpcomingNow()) {
             return null;
         }
@@ -135,11 +134,9 @@ class SermonService
         $upcoming = $this->fetchUpcomingFromYoutube();
 
         if ($upcoming !== null) {
-            // 찾았다 — 다음 주 라이브가 끝날 때까지 무기한 캐싱, 재시도 타이머 삭제
             Cache::forever(self::UPCOMING_CACHE_KEY, ['sermon' => $upcoming]);
             Cache::forget(self::NEXT_UPCOMING_CHECK_KEY);
         } else {
-            // 아직 없다 — 4시간 뒤 다시 확인하도록 예약
             Cache::put(self::NEXT_UPCOMING_CHECK_KEY, now()->addHours(4)->timestamp, now()->addHours(5));
         }
 
@@ -150,12 +147,7 @@ class SermonService
     {
         $nextCheckAt = Cache::get(self::NEXT_UPCOMING_CHECK_KEY);
 
-        // 예약된 재시도 시각이 없으면(최초 1회) 바로 확인
-        if ($nextCheckAt === null) {
-            return true;
-        }
-
-        return now()->timestamp >= $nextCheckAt;
+        return $nextCheckAt === null || now()->timestamp >= $nextCheckAt;
     }
 
     private function fetchUpcomingFromYoutube(): ?array
@@ -187,7 +179,6 @@ class SermonService
         ];
     }
 
-    /** 라이브 종료가 확인된 시점에 호출 — 다음 주 upcoming 재탐색을 시작시킴 */
     private function resetUpcomingForNextWeek(): void
     {
         Cache::forget(self::UPCOMING_CACHE_KEY);
@@ -195,14 +186,13 @@ class SermonService
     }
 
     // ══════════════════════════════════════════════════════════════
-    // 3. Live 시작 → 종료 감지 (일요일 시간대 기반 동적 폴링)
+    // 3. Live start → end detection (Sunday-only, time-windowed TTL)
     // ══════════════════════════════════════════════════════════════
 
     public function getLiveSermon(): ?array
     {
         $ttl = $this->liveWindowCacheTtl();
 
-        // ttl === null → 이 구간에서는 API 호출 자체를 안 함, 캐시도 안 건드림
         if ($ttl === null) {
             return null;
         }
@@ -217,7 +207,6 @@ class SermonService
 
         $isLiveNow = $cached['sermon'];
 
-        // 직전엔 라이브였는데 이번 체크에서 null이 됐다 = 방금 종료됨
         if ($wasLive !== null && $isLiveNow === null) {
             $this->resetUpcomingForNextWeek();
         }
@@ -225,10 +214,6 @@ class SermonService
         return $isLiveNow;
     }
 
-    /**
-     * 시간대별 폴링 TTL 결정.
-     * null = 이 시간대엔 아예 확인하지 않음 (평일/이른 시간)
-     */
     private function liveWindowCacheTtl(): ?int
     {
         $now = now();
@@ -242,24 +227,23 @@ class SermonService
         $endCheckStart = $now->copy()->setTime(12, 0);
 
         if ($now->lt($preLiveStart)) {
-            return null; // 일요일이지만 아직 이른 시간 — 확인 안 함
+            return null;
         }
 
         if ($now->between($preLiveStart, $liveStart)) {
-            return 120; // 10:50~10:59 — 시작 감지, 2분 주기
+            return 120;
         }
 
         if ($now->between($liveStart, $endCheckStart)) {
-            return 600; // 11:00~11:59 — 이미 시작 확인됨, 10분 주기로 느슨하게
+            return 600;
         }
 
-        // 12:00 이후 — 종료될 때까지 5분 주기 유지 (하드 컷오프 없음)
         $lastKnown = Cache::get(self::LIVE_CACHE_KEY);
         if ($lastKnown !== null && $lastKnown['sermon'] === null) {
-            return null; // 이미 종료 확인됨 — 더 이상 안 물어봄
+            return null;
         }
 
-        return 300; // 5분
+        return 300;
     }
 
     private function fetchLiveFromYoutube(): ?array
