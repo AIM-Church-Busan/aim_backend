@@ -44,15 +44,20 @@ class AuthController extends Controller
     // POST /api/auth/logout
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        Auth::guard('planning_center')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json(['message' => 'Logged out successfully']);
     }
 
-    // GET /api/auth/me
     public function me(Request $request)
     {
-        $user = $request->user();
+        $user = Auth::guard('planning_center')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
 
         return response()->json([
             'id'         => $user->id,

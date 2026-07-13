@@ -13,7 +13,7 @@ Route::prefix('auth')->group(function () {
     Route::get('planning-center/redirect', [AuthController::class, 'redirect']);
     Route::get('planning-center/callback', [AuthController::class, 'callback']);
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('auth:planning_center')->group(function () {   // auth:sanctum → auth:planning_center
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
     });

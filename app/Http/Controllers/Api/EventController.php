@@ -37,7 +37,7 @@ class EventController extends Controller
     public function show(int $id): JsonResponse
     {
         $event = $this->eventService->getEventById($id);
-        $userId = auth()->id();
+        $userId = auth('planning_center')->id();
 
         return response()->json([
             'data' => array_merge($event->toArray(), [

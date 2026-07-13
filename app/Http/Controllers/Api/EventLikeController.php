@@ -20,7 +20,7 @@ class EventLikeController extends Controller
      */
     public function toggle(Event $event): JsonResponse
     {
-        $planningCenterUser = PlanningCenterUser::where('planning_center_id', auth()->user()->planning_center_id)->firstOrFail();
+        $planningCenterUser = PlanningCenterUser::where('planning_center_id', auth('planning_center')->user()->planning_center_id)->firstOrFail();
 
         $liked = $this->eventLikeService->toggleLike($event, $planningCenterUser->id);
 
