@@ -41,4 +41,9 @@ return [
         'redirect'      => env('PLANNING_CENTER_REDIRECT_URI'),
     ],
 
+    'youtube' => [
+        'api_key' => env('YOUTUBE_API_KEY'),
+        'channel_id' => env('YOUTUBE_CHANNEL_ID'),
+        'cache_ttl' => env('YOUTUBE_CACHE_TTL', 300),
+    ],
 ];
