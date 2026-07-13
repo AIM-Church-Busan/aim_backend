@@ -8,7 +8,7 @@ class StoreEventRegistrationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check();
+        return auth('planning_center')->check();
     }
 
     public function rules(): array
