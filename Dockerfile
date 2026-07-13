@@ -31,7 +31,7 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 
 # Composer 스크립트 실행하지 않음
-RUN composer install \
+RUN composer install -vvv \
     --no-dev \
     --no-interaction \
     --optimize-autoloader \
