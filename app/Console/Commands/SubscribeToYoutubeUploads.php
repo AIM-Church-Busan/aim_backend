@@ -13,7 +13,7 @@ class SubscribeToYoutubeUploads extends Command
     public function handle(): int
     {
         $channelId = config('services.youtube.channel_id');
-        $topic = "https://www.youtube.com/xml/feeds/videos.xml?channel_id={$channelId}";
+        $topic = "https://www.youtube.com/feeds/videos.xml?channel_id={$channelId}";
         $callback = route('youtube.webhook');
 
         $payload = [
