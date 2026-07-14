@@ -9,6 +9,9 @@ php artisan package:discover --ansi
 php artisan config:clear
 php artisan config:cache
 
+php artisan view:cache
+php artisan event:cache
+
 php artisan route:clear
 php artisan route:cache
 
