@@ -17,6 +17,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e, Request $request) {
+           if (config('app.debug')) {
+               return response(
+                   get_class($e)."\n\n".$e->getMessage()."\n\n".$e->getTraceAsString(),
+                   $e->getStatusCode(),
+                   ['Content-Type' => 'text/plain']
+               );
+           }
+        });
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
