@@ -32,3 +32,35 @@ Route::get('/test-staff-mail-preview', function () {
         now()->format('F j, Y g:i A')
     ))->render();
 });
+
+// Diagnosing Speed
+Route::get('/__diag', function () {
+    $t0 = microtime(true);
+
+    \DB::select('select 1');
+    $t1 = microtime(true);
+
+    \Illuminate\Support\Facades\Cache::put('diag_test', 'ok', 10);
+    \Illuminate\Support\Facades\Cache::get('diag_test');
+    $t2 = microtime(true);
+
+    return response()->json([
+        'db_ms'    => round(($t1 - $t0) * 1000, 1),
+        'redis_ms' => round(($t2 - $t1) * 1000, 1),
+        'total_ms' => round(($t2 - $t0) * 1000, 1),
+    ]);
+});
+
+Route::get('/__diag2', function () {
+    $boot = microtime(true) - LARAVEL_START;
+
+    $t0 = microtime(true);
+    $html = view('welcome')->render(); // 프로젝트에 있는 아무 blade 뷰로 교체 가능
+    $renderMs = round((microtime(true) - $t0) * 1000, 1);
+
+    return response()->json([
+        'boot_ms'   => round($boot * 1000, 1),   // 요청 시작~이 라우트 도달까지
+        'render_ms' => $renderMs,                 // 뷰 렌더링만
+        'opcache_enabled' => function_exists('opcache_get_status') && opcache_get_status() !== false,
+    ]);
+});

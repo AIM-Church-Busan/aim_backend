@@ -1,0 +1,16 @@
+name: Renew YouTube Webhook Subscription
+
+on:
+  schedule:
+    - cron: '0 3 */4 * *'  # 4일마다 UTC 03:00 (KST 12:00)
+  workflow_dispatch: {}      # Actions 탭에서 수동 실행도 가능
+
+jobs:
+  resubscribe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger subscribe endpoint
+        run: |
+          curl -X POST "${{ secrets.APP_URL }}/api/internal/youtube/subscribe" \
+            -H "X-Internal-Secret: ${{ secrets.INTERNAL_TASK_SECRET }}" \
+            --fail
