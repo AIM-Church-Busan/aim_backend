@@ -32,3 +32,21 @@ Route::get('/test-staff-mail-preview', function () {
         now()->format('F j, Y g:i A')
     ))->render();
 });
+
+// Diagnosing Speed
+Route::get('/__diag', function () {
+    $t0 = microtime(true);
+
+    \DB::select('select 1');
+    $t1 = microtime(true);
+
+    \Illuminate\Support\Facades\Cache::put('diag_test', 'ok', 10);
+    \Illuminate\Support\Facades\Cache::get('diag_test');
+    $t2 = microtime(true);
+
+    return response()->json([
+        'db_ms'    => round(($t1 - $t0) * 1000, 1),
+        'redis_ms' => round(($t2 - $t1) * 1000, 1),
+        'total_ms' => round(($t2 - $t0) * 1000, 1),
+    ]);
+});
