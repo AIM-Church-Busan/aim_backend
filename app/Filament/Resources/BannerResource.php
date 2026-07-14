@@ -59,7 +59,6 @@ class BannerResource extends Resource
                 Forms\Components\FileUpload::make('image_url')
                     ->label('Banner Image')
                     ->image()
-                    ->disk('s3')
                     ->directory('banners')
                     ->visibility('public')
                     ->imagePreviewHeight('200')
@@ -91,7 +90,6 @@ class BannerResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('image_url')
                     ->label('Image')
-                    ->disk('s3')
                     ->height(60)
                     ->width(120),
 
