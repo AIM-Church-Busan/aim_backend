@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\SermonController;
 use App\Http\Controllers\Api\YoutubeWebhookController;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Http\Request;
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
