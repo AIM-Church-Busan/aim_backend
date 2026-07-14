@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libgd-dev \
+    libicu-dev \
+    && docker-php-ext-configure intl \
     && docker-php-ext-install \
         pdo \
         pdo_pgsql \
@@ -20,6 +22,7 @@ RUN apt-get update && apt-get install -y \
         xml \
         bcmath \
         gd \
+        intl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
