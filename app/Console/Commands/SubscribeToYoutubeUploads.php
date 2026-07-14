@@ -20,7 +20,7 @@ class SubscribeToYoutubeUploads extends Command
             'hub.mode'     => 'subscribe',
             'hub.topic'    => $topic,
             'hub.callback' => $callback,
-            'hub.verify'   => 'sync', // task: 디버깅용 임시 변경, 확인 후 async로 되돌리기
+            'hub.verify'   => 'async',
         ];
 
         if ($secret = config('services.youtube.webhook_secret')) {
