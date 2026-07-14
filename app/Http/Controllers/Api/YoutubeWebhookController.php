@@ -14,11 +14,6 @@ class YoutubeWebhookController extends Controller
         private readonly SermonService $sermonService,
     ) {}
 
-    /**
-     * Handles both:
-     * - GET: PubSubHubbub subscription verification (must echo hub_challenge back)
-     * - POST: new/updated video notification (Atom XML body)
-     */
     public function handle(Request $request): Response
     {
         if ($request->isMethod('get')) {
@@ -33,8 +28,17 @@ class YoutubeWebhookController extends Controller
         $challenge = $request->query('hub_challenge');
 
         if (!$challenge) {
+            Log::warning('YouTube 구독 검증 요청에 hub_challenge 없음', [
+                'query' => $request->query(),
+            ]);
+
             return response('Missing hub_challenge', 400);
         }
+
+        Log::info('YouTube 구독 검증 성공', [
+            'mode'  => $request->query('hub_mode'),
+            'topic' => $request->query('hub_topic'),
+        ]);
 
         return response($challenge, 200);
     }
@@ -45,6 +49,8 @@ class YoutubeWebhookController extends Controller
             Log::warning('YouTube webhook: invalid signature, ignoring notification.');
             return response('', 204);
         }
+
+        Log::info('YouTube 웹훅 알림 수신 — sermons 캐시 무효화 실행');
 
         // We don't need to parse the Atom XML body in detail — any notification
         // means the uploads feed changed, so we just invalidate the cache and
@@ -58,7 +64,6 @@ class YoutubeWebhookController extends Controller
     {
         $secret = config('services.youtube.webhook_secret');
 
-        // If no secret is configured, skip verification (not recommended for production).
         if (!$secret) {
             return true;
         }
