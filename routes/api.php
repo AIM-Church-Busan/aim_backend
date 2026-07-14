@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\EventRegistrationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\SermonController;
 use App\Http\Controllers\Api\YoutubeWebhookController;
+use Illuminate\Support\Facades\Artisan;
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -54,3 +55,17 @@ Route::prefix('sermons')->group(function () {
 
 Route::match(['get', 'post'], 'youtube/webhook', [YoutubeWebhookController::class, 'handle'])
     ->name('youtube.webhook');
+
+// ─── Internal Task Trigger (셸 접근 불가한 배포 환경용) ──────────────────────────
+
+Route::post('internal/youtube/subscribe', function (Request $request) {
+    if ($request->header('X-Internal-Secret') !== config('services.internal.task_secret')) {
+        abort(403);
+    }
+
+    Artisan::call('youtube:subscribe');
+
+    return response()->json([
+        'output' => Artisan::output(),
+    ]);
+});

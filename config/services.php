@@ -46,4 +46,8 @@ return [
         'channel_id' => env('YOUTUBE_CHANNEL_ID'),
         'webhook_secret' => env('YOUTUBE_WEBHOOK_SECRET'),
     ],
+
+    'internal' => [
+        'task_secret' => env('INTERNAL_TASK_SECRET'),
+    ],
 ];
