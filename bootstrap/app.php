@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Temporary HTTP exception exposure for debugging
+        /*
         $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e, Request $request) {
            if (config('app.debug')) {
                return response(
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
                );
            }
         });
+        */
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
