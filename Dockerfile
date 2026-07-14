@@ -57,4 +57,4 @@ EXPOSE 10000
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=10000"]
+CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
