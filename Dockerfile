@@ -23,6 +23,13 @@ RUN apt-get update && apt-get install -y \
         bcmath \
         gd \
         intl \
+    && docker-php-ext-enable opcache \
+    && { \
+      echo 'opcache.enable=1'; \
+      echo 'opcache.memory_consumption=128'; \
+      echo 'opcache.max_accelerated_files=10000'; \
+      echo 'opcache.validate_timestamps=0'; \
+    } > /usr/local/etc/php/conf.d/opcache-custom.ini \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
