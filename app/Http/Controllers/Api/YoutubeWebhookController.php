@@ -16,6 +16,11 @@ class YoutubeWebhookController extends Controller
 
     public function handle(Request $request): Response
     {
+        Log::info('Youtube 웹훅 요청 수신', [
+            'method' => $request->method(),
+            'query'  => $request->query(),
+            'ip'     => $request->ip(),
+        ]);
         if ($request->isMethod('get')) {
             return $this->verifySubscription($request);
         }
