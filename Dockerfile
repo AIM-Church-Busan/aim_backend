@@ -50,6 +50,10 @@ RUN composer install -vvv \
 # 나머지 프로젝트 복사
 COPY . .
 
+# Nginx 설정 반영 (php artisan serve 대신 nginx + php-fpm 사용)
+COPY docker/nginx.conf /etc/nginx/sites-available/default
+RUN nginx -t
+
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
