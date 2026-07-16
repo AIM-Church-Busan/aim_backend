@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\SermonController;
 use App\Http\Controllers\Api\YoutubeWebhookController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Api\InstagramAuthController;
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -81,3 +82,11 @@ Route::get('debug/raw-log-test', function () {
     \Log::info('LARAVEL LOG TEST — Log 파사드로 씀');
     return 'ok';
 });
+
+// ─── Instagram Auth ───────────────────────────────────────────────────────────
+
+Route::prefix('instagram/auth')->group(function () {
+    Route::get('redirect', [InstagramAuthController::class, 'redirect']);
+    Route::get('callback', [InstagramAuthController::class, 'callback']);
+});
+
