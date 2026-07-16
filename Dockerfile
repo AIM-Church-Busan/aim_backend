@@ -50,6 +50,10 @@ RUN composer install -vvv \
 # 나머지 프로젝트 복사
 COPY . .
 
+# storage, bootstrap/cache를 php-fpm 실행 사용자(www-data)가 쓸 수 있도록 권한 설정
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
 # Nginx 설정 반영 (php artisan serve 대신 nginx + php-fpm 사용)
 COPY docker/nginx.conf /etc/nginx/sites-available/default
 RUN nginx -t
