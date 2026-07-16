@@ -60,16 +60,20 @@ Route::match(['get', 'post'], 'youtube/webhook', [YoutubeWebhookController::clas
 
 // ─── Internal Task Trigger (셸 접근 불가한 배포 환경용) ──────────────────────────
 
-Route::post('internal/youtube/subscribe', function (Request $request) {
+Route::post('internal/artisan/{command}', function (Request $request, string $command) {
     if ($request->header('X-Internal-Secret') !== config('services.internal.task_secret')) {
         abort(403);
     }
 
-    Artisan::call('youtube:subscribe');
+    $allowedCommands = ['youtube:subscribe', 'instagram:refresh-token'];
 
-    return response()->json([
-        'output' => Artisan::output(),
-    ]);
+    if (!in_array($command, $allowedCommands)) {
+        abort(404);
+    }
+
+    Artisan::call($command);
+
+    return response()->json(['output' => Artisan::output()]);
 });
 
 Route::get('debug/log-test', function () {

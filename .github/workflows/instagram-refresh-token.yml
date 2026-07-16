@@ -1,0 +1,16 @@
+name: Refresh Instagram Token
+
+on:
+  schedule:
+    - cron: '0 4 * * *'  # 매일 UTC 04:00 (KST 13:00)
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger refresh endpoint
+        run: |
+          curl -X POST "${{ secrets.APP_URL }}/api/internal/artisan/instagram:refresh-token" \
+            -H "X-Internal-Secret: ${{ secrets.INTERNAL_TASK_SECRET }}" \
+            --fail
