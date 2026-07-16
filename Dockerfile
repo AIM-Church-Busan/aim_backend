@@ -74,4 +74,4 @@ EXPOSE 10000
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-CMD ["sh", "-c", "php-fpm -F & nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "php artisan queue:work --sleep=3 --tries=3 --max-time=3600 & php-fpm -F & nginx -g 'daemon off;'"]
