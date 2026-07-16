@@ -33,6 +33,15 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN { \
+      echo 'catch_workers_output = yes'; \
+      echo 'decorate_workers_output = no'; \
+    } >> /usr/local/etc/php-fpm.d/www.conf \
+    && { \
+      echo '[global]'; \
+      echo 'error_log = /proc/self/fd/2'; \
+    } >> /usr/local/etc/php-fpm.conf
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
