@@ -70,3 +70,8 @@ Route::post('internal/youtube/subscribe', function (Request $request) {
         'output' => Artisan::output(),
     ]);
 });
+
+Route::get('debug/log-test', function () {
+    \Log::info('로그 테스트 — 이게 보이면 stdout 로그 정상 작동');
+    return 'ok';
+});
