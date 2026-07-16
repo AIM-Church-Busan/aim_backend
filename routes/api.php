@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\YoutubeWebhookController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\InstagramAuthController;
+use App\Http\Controllers\Api\InstagramController;
+
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -65,7 +67,7 @@ Route::post('internal/artisan/{command}', function (Request $request, string $co
         abort(403);
     }
 
-    $allowedCommands = ['youtube:subscribe', 'instagram:refresh-token'];
+    $allowedCommands = ['youtube:subscribe', 'instagram:refresh-token', 'instagram:refresh-feed'];
 
     if (!in_array($command, $allowedCommands)) {
         abort(404);
@@ -93,4 +95,7 @@ Route::prefix('instagram/auth')->group(function () {
     Route::get('redirect', [InstagramAuthController::class, 'redirect']);
     Route::get('callback', [InstagramAuthController::class, 'callback']);
 });
+
+Route::get('instagram/feed', [InstagramController::class, 'feed']);
+
 

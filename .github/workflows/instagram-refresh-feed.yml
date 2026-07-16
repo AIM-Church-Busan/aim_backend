@@ -1,0 +1,16 @@
+name: Refresh Instagram Feed
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 매시간
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger refresh endpoint
+        run: |
+          curl -X POST "${{ secrets.APP_URL }}/api/internal/artisan/instagram:refresh-feed" \
+            -H "X-Internal-Secret: ${{ secrets.INTERNAL_TASK_SECRET }}" \
+            --fail
