@@ -33,6 +33,26 @@ Route::get('/test-staff-mail-preview', function () {
     ))->render();
 });
 
+Route::get('/test-mail-send', function (\Illuminate\Http\Request $request) {
+    if ($request->query('secret') !== config('services.internal.task_secret')) {
+        abort(403);
+    }
+
+    $to = $request->query('to');
+    if (!$to) {
+        return 'Usage: ?to=your@email.com&secret=...';
+    }
+
+    \Illuminate\Support\Facades\Mail::to($to)->send(new App\Mail\GenericMail(
+        'Test',
+        'This is a deployment SMTP test email — Render → Mailtrap.',
+        'Visit Our Website',
+        'https://aimchurch.com'
+    ));
+
+    return "Sent to {$to} via mailer: " . config('mail.default');
+});
+
 // Diagnosing Speed
 Route::get('/__diag', function () {
     $t0 = microtime(true);

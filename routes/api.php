@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\SermonController;
 use App\Http\Controllers\Api\YoutubeWebhookController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Api\InstagramAuthController;
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -59,14 +60,37 @@ Route::match(['get', 'post'], 'youtube/webhook', [YoutubeWebhookController::clas
 
 // ─── Internal Task Trigger (셸 접근 불가한 배포 환경용) ──────────────────────────
 
-Route::post('internal/youtube/subscribe', function (Request $request) {
+Route::post('internal/artisan/{command}', function (Request $request, string $command) {
     if ($request->header('X-Internal-Secret') !== config('services.internal.task_secret')) {
         abort(403);
     }
 
-    Artisan::call('youtube:subscribe');
+    $allowedCommands = ['youtube:subscribe', 'instagram:refresh-token'];
 
-    return response()->json([
-        'output' => Artisan::output(),
-    ]);
+    if (!in_array($command, $allowedCommands)) {
+        abort(404);
+    }
+
+    Artisan::call($command);
+
+    return response()->json(['output' => Artisan::output()]);
 });
+
+Route::get('debug/log-test', function () {
+    \Log::info('로그 테스트 — 이게 보이면 stdout 로그 정상 작동');
+    return 'ok';
+});
+
+Route::get('debug/raw-log-test', function () {
+    error_log('RAW STDERR TEST — PHP 순수 함수로 직접 씀');
+    \Log::info('LARAVEL LOG TEST — Log 파사드로 씀');
+    return 'ok';
+});
+
+// ─── Instagram Auth ───────────────────────────────────────────────────────────
+
+Route::prefix('instagram/auth')->group(function () {
+    Route::get('redirect', [InstagramAuthController::class, 'redirect']);
+    Route::get('callback', [InstagramAuthController::class, 'callback']);
+});
+

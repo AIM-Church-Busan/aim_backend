@@ -50,4 +50,11 @@ return [
     'internal' => [
         'task_secret' => env('INTERNAL_TASK_SECRET'),
     ],
+
+    'instagram' => [
+        'client_id'     => env('INSTAGRAM_CLIENT_ID'),
+        'client_secret' => env('INSTAGRAM_CLIENT_SECRET'),
+        'redirect'      => env('INSTAGRAM_REDIRECT_URI'),
+        'cache_ttl'     => env('INSTAGRAM_FEED_CACHE_TTL', 1800),
+    ],
 ];

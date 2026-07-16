@@ -33,6 +33,15 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN { \
+      echo 'catch_workers_output = yes'; \
+      echo 'decorate_workers_output = no'; \
+    } >> /usr/local/etc/php-fpm.d/www.conf \
+    && { \
+      echo '[global]'; \
+      echo 'error_log = /proc/self/fd/2'; \
+    } >> /usr/local/etc/php-fpm.conf
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
@@ -50,6 +59,10 @@ RUN composer install -vvv \
 # 나머지 프로젝트 복사
 COPY . .
 
+# storage, bootstrap/cache를 php-fpm 실행 사용자(www-data)가 쓸 수 있도록 권한 설정
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
 # Nginx 설정 반영 (php artisan serve 대신 nginx + php-fpm 사용)
 COPY docker/nginx.conf /etc/nginx/sites-available/default
 RUN nginx -t
@@ -61,4 +74,4 @@ EXPOSE 10000
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "php artisan queue:work --sleep=3 --tries=3 --max-time=3600 & php-fpm -F & nginx -g 'daemon off;'"]
