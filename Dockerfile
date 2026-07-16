@@ -65,4 +65,4 @@ EXPOSE 10000
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "php-fpm -F & nginx -g 'daemon off;'"]
