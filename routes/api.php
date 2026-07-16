@@ -75,3 +75,9 @@ Route::get('debug/log-test', function () {
     \Log::info('로그 테스트 — 이게 보이면 stdout 로그 정상 작동');
     return 'ok';
 });
+
+Route::get('debug/raw-log-test', function () {
+    error_log('RAW STDERR TEST — PHP 순수 함수로 직접 씀');
+    \Log::info('LARAVEL LOG TEST — Log 파사드로 씀');
+    return 'ok';
+});
