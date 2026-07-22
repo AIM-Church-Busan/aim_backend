@@ -27,6 +27,7 @@ class Event extends Model
         'external_link',
         'google_calendar_event_id',
         'is_published',
+        'is_banner'
     ];
 
     protected $casts = [
