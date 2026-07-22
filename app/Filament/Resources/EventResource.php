@@ -154,6 +154,10 @@ class EventResource extends Resource
                     Forms\Components\Toggle::make('is_published')
                         ->label('Published')
                         ->default(false),
+
+                    Forms\Components\Toggle::make('is_banner')
+                        ->label('Banner')
+                        ->default(false),
                 ]),
         ]);
     }
@@ -182,6 +186,10 @@ class EventResource extends Resource
 
                 Tables\Columns\IconColumn::make('is_published')
                     ->label('Published')
+                    ->boolean(),
+
+                Tables\Columns\IconConlumn::make('is_banner')
+                    ->label('Banner')
                     ->boolean(),
 
                 Tables\Columns\TextColumn::make('deleted_at')
