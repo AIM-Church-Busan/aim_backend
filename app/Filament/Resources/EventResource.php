@@ -188,7 +188,7 @@ class EventResource extends Resource
                     ->label('Published')
                     ->boolean(),
 
-                Tables\Columns\IconConlumn::make('is_banner')
+                Tables\Columns\IconColumn::make('is_banner')
                     ->label('Banner')
                     ->boolean(),
 
