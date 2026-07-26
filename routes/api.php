@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Api\InstagramAuthController;
 use App\Http\Controllers\Api\InstagramController;
 use App\Http\Controllers\Api\SubscriberController;
+use App\Http\Controllers\Api\ChurchBulletinController;
 
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -114,3 +115,15 @@ Route::prefix('subscribers')->group(function () {
     Route::get('/unsubscribe/{token}', [SubscriberController::class, 'unsubscribe']);
 });
 
+// ─── Church Bulletins (Public) ─────────────────────────────────────────────
+
+/**
+ * Policy:
+ * - Public, unauthenticated GET-only endpoints — no create/update/delete
+ *   exposed here; those stay admin-only via Filament.
+ */
+
+Route::prefix('bulletins')->group(function () {
+    Route::get('/', [ChurchBulletinController::class, 'index']);
+    Route::get('/{bulletin}', [ChurchBulletinController::class, 'show']);
+});
