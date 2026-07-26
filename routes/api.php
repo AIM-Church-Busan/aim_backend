@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\InstagramAuthController;
 use App\Http\Controllers\Api\InstagramController;
+use App\Http\Controllers\Api\SubscriberController;
 
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -98,4 +99,18 @@ Route::prefix('instagram/auth')->group(function () {
 
 Route::get('instagram/feed', [InstagramController::class, 'feed']);
 
+// ─── Newsletter Subscription ───────────────────────────────────────────────────
+
+/**
+ * Policy:
+ * - POST /subscribers is throttled to 5 requests/min to prevent spam/bot signups.
+ * - confirm / unsubscribe are GET routes — they must work from a single link
+ *   click in an email client, so POST/PATCH (which need a form submission)
+ *   cannot be used here.
+ */
+Route::prefix('subscribers')->group(function () {
+    Route::post('/', [SubscriberController::class, 'store'])->middleware('throttle:5,1');
+    Route::get('/confirm/{token}', [SubscriberController::class, 'confirm']);
+    Route::get('/unsubscribe/{token}', [SubscriberController::class, 'unsubscribe']);
+});
 
