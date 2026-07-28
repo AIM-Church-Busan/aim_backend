@@ -27,21 +27,31 @@ class ChurchBulletinResource extends Resource
     {
         return $form->schema([
             Forms\Components\TextInput::make('title')
-                ->label('제목')
+                ->label('Title')
                 ->required()
                 ->maxLength(255),
             Forms\Components\Textarea::make('content')
-                ->label('내용')
+                ->label('Content')
                 ->rows(5)
                 ->required(),
             Forms\Components\FileUpload::make('pdf_path')
-                ->label('PDF 파일')
+                ->label('PDF file')
                 ->disk('public')
                 ->directory('bulletins')
                 ->acceptedFileTypes(['application/pdf'])
                 ->downloadable()
                 ->openable()
                 ->required(),
+            Forms\Components\FileUpload::make('thumbnail_path')
+                ->label('Thumbnail image')
+                ->disk('public')
+                ->directory('bulletins/thumbnails')
+                ->image()
+                ->openable(),
+            Forms\Components\TextInput::make('thumbnail_url')
+                ->label('Thumbnail image url (optional)')
+                ->url()
+                ->helperText('Url to an image that will be used as a thumbnail for the bulletin.'),
         ]);
     }
 
@@ -49,9 +59,10 @@ class ChurchBulletinResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')->label('제목')->searchable(),
-                Tables\Columns\TextColumn::make('created_at')->label('업로드일')->dateTime('Y-m-d H:i')->sortable(),
-                Tables\Columns\TextColumn::make('updated_at')->label('수정일')->dateTime('Y-m-d H:i')->sortable(),
+                Tables\Columns\ImageColumn::make('thumbnail_url')->label('Thumbnail')->circular(),
+                Tables\Columns\TextColumn::make('title')->label('Title')->searchable(),
+                Tables\Columns\TextColumn::make('created_at')->label('Uploaded at')->dateTime('Y-m-d H:i')->sortable(),
+                Tables\Columns\TextColumn::make('updated_at')->label('Updated at')->dateTime('Y-m-d H:i')->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
