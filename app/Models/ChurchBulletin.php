@@ -13,12 +13,19 @@ use Illuminate\Support\Facades\Storage;
  */
 class ChurchBulletin extends Model
 {
-    protected $fillable = ['title', 'content', 'pdf_path'];
+    protected $fillable = ['title', 'content', 'pdf_path', 'thumbnail_path', 'thumbnail_url'];
 
     protected $appends = ['pdf_url'];
+
+    protected $hidden = ['pdf_path', 'thumbnail_path'];
 
     public function getPdfUrlAttribute(): ?string
     {
         return $this->pdf_path ? Storage::disk('public')->url($this->pdf_path) : null;
+    }
+
+    public function getThumbnailUrlAttribute(?string $value): ?string
+    {
+        return $value ?: ($this->thumbnail_path ? Storage::disk('public')->url($this->thumbnail_path) : null;
     }
 }
