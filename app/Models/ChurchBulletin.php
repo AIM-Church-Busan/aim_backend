@@ -26,6 +26,6 @@ class ChurchBulletin extends Model
 
     public function getThumbnailUrlAttribute(?string $value): ?string
     {
-        return $value ?: ($this->thumbnail_path ? Storage::disk('public')->url($this->thumbnail_path) : null;
+        return $value ?: ($this->thumbnail_path ? Storage::disk('public')->url($this->thumbnail_path) : null);
     }
 }
