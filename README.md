@@ -1,5 +1,5 @@
 ![AIM admin page](./chrome_3NmENSDJNL.png)
-![AIM admin page - edit bulletin]()
+![AIM admin page - edit bulletin](./chrome_ZKYPcQWB3F.png)
 # AIM Church Busan — Backend
 
 The backend API and admin panel for the AIM Church Busan website, built with Laravel. It serves events, sermons, announcements, church bulletins, and newsletter subscriptions to the [frontend](https://github.com/AIM-Church-Busan/aim_frontend), integrates with Planning Center for member authentication, and syncs content from YouTube and Instagram.
