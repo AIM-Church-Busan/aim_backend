@@ -1,59 +1,145 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# AIM Church Busan — Backend
 
-## About Laravel
+The backend API and admin panel for the AIM Church Busan website, built with Laravel. It serves events, sermons, announcements, church bulletins, and newsletter subscriptions to the [frontend](https://github.com/AIM-Church-Busan/aim_frontend), integrates with Planning Center for member authentication, and syncs content from YouTube and Instagram.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tech Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Area | Technology |
+| --- | --- |
+| Framework | Laravel 12 (PHP 8.2+) |
+| Admin panel | Filament 3 |
+| Auth | Laravel Sanctum, Laravel Socialite (custom Planning Center provider) |
+| Queue / Cache | Redis (Predis) |
+| Error tracking | Sentry |
+| Frontend build | Vite |
+| Deployment | Docker (PHP-FPM + Nginx) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Features
 
-## Learning Laravel
+- **Events** — public listing/detail endpoints, plus like and registration endpoints for authenticated members (`app/Http/Controllers/Api`, `app/Services/EventService.php`)
+- **Announcements & Church Bulletins** — public read endpoints; creation/editing is admin-only via Filament
+- **Sermons** — public endpoints for sermon list, live status, and upcoming sermons, synced from YouTube (`SermonService`, `YoutubeWebhookController`)
+- **Newsletter subscriptions** — subscribe/confirm/unsubscribe flow with double opt-in confirmation emails and a rate-limited signup endpoint (`SubscriberController`, `app/Jobs/DispatchNewsletterJob.php`)
+- **Planning Center authentication** — members log in via Planning Center OAuth (`app/Socialite/PlanningCenterProvider.php`, `app/Http/Controllers/Api/AuthController.php`)
+- **Instagram feed sync** — OAuth connection and scheduled feed/token refresh (`InstagramFeedService`, `app/Console/Commands`)
+- **Admin panel** — Filament resources for managing announcements, banners, church bulletins, events, and subscribers (`app/Filament/Resources`)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## API Overview
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Route | Description |
+| --- | --- |
+| `GET /api/events`, `GET /api/events/{event}` | Public event listing/detail |
+| `POST /api/events/{event}/like` | Toggle like (auth required) |
+| `POST /api/events/{event}/register`, `DELETE /api/events/{event}/register` | Register/cancel registration (auth required) |
+| `GET /api/announcements`, `GET /api/announcements/{announcement}` | Public announcements |
+| `GET /api/sermons`, `GET /api/sermons/live`, `GET /api/sermons/upcoming`, `GET /api/sermons/{id}` | Public sermon data |
+| `GET /api/bulletins`, `GET /api/bulletins/{bulletin}` | Public church bulletins |
+| `POST /api/subscribers` | Newsletter signup (rate-limited) |
+| `GET /api/subscribers/confirm/{token}`, `GET /api/subscribers/unsubscribe/{token}` | Email confirmation / unsubscribe |
+| `GET/POST /api/youtube/webhook` | YouTube PubSubHubbub webhook |
+| `GET /api/instagram/auth/redirect`, `GET /api/instagram/auth/callback` | Instagram OAuth |
+| `GET /api/instagram/feed` | Instagram feed |
+| `POST /api/auth/logout`, `GET /api/auth/me` | Authenticated user (Planning Center guard) |
+| `POST /api/internal/artisan/{command}` | Internal-only Artisan command trigger, protected by `X-Internal-Secret` header (used in deployments without shell access) |
 
-## Laravel Sponsors
+See `routes/api.php` for the full route list.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Data Model
 
-### Premium Partners
+Key Eloquent models (`app/Models`):
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- `Event`, `EventLike`, `EventRegistration`
+- `Announcement`
+- `ChurchBulletin`
+- `Banner`
+- `Subscriber`
+- `PlanningCenterUser`, `User`, `UserLifeGroup`
+- `InstagramToken`
 
-## Contributing
+## Getting Started
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Prerequisites
 
-## Code of Conduct
+- PHP 8.2+
+- Composer
+- Node.js (for asset building via Vite)
+- Redis
+- PostgreSQL (used in the Docker deployment) or another Laravel-supported database
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Installation
 
-## Security Vulnerabilities
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Environment Variables
 
-## License
+In addition to the standard Laravel variables (`APP_*`, `DB_*`, `REDIS_*`, `MAIL_*`), configure the following third-party integrations in `.env`:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```env
+# Planning Center OAuth
+PLANNING_CENTER_CLIENT_ID=
+PLANNING_CENTER_CLIENT_SECRET=
+PLANNING_CENTER_REDIRECT_URI=
+
+# YouTube
+YOUTUBE_API_KEY=
+YOUTUBE_CHANNEL_ID=
+YOUTUBE_WEBHOOK_SECRET=
+
+# Instagram
+INSTAGRAM_CLIENT_ID=
+INSTAGRAM_CLIENT_SECRET=
+INSTAGRAM_REDIRECT_URI=
+INSTAGRAM_FEED_CACHE_TTL=1800
+
+# Internal task trigger (see /api/internal/artisan/{command})
+INTERNAL_TASK_SECRET=
+```
+
+### Database
+
+```bash
+php artisan migrate
+```
+
+### Development
+
+Run the app, queue worker, log tailer, and Vite dev server together:
+
+```bash
+composer dev
+```
+
+Or individually:
+
+```bash
+php artisan serve
+php artisan queue:listen
+npm run dev
+```
+
+The Filament admin panel is available once you've created a user and are running the app locally (check `app/Providers/Filament` for the panel path).
+
+### Scheduled Tasks
+
+Two scheduled commands keep external integrations fresh (`routes/console.php`):
+
+- `youtube:subscribe` — renews the YouTube PubSubHubbub subscription weekly
+- `instagram:refresh-token` — refreshes the Instagram access token daily
+
+Make sure the Laravel scheduler is running in production (e.g. a cron entry calling `php artisan schedule:run` every minute).
+
+### Testing
+
+```bash
+composer test
+```
+
+## Deployment
+
+A `Dockerfile` is provided (PHP-FPM + Nginx) along with `docker-entrypoint.sh` and `docker/nginx.conf` for containerized deployment.
