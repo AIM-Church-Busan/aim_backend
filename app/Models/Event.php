@@ -51,6 +51,28 @@ class Event extends Model
                 $event->remaining_spots = $event->capacity;
             }
         });
+
+        static::updating(function (Event $event) {
+            $today = now()->toDateString();
+            $wasExpiredDateExtended = collect(['starts_at', 'due_date'])
+                ->contains(function (string $field) use ($event, $today): bool {
+                    if (!$event->isDirty($field)) {
+                        return false;
+                    }
+
+                    $previousDate = $event->getRawOriginal($field);
+                    $currentDate = $event->{$field}?->toDateString();
+
+                    return $previousDate !== null
+                        && $previousDate < $today
+                        && $currentDate !== null
+                        && $currentDate >= $today;
+                });
+
+            if ($wasExpiredDateExtended && !$event->isDirty('is_published')) {
+                $event->is_published = true;
+            }
+        });
     }
 
     // ─── Relationships ────────────────────────────────────────────
