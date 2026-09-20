@@ -7,7 +7,8 @@ return [
         'http://localhost:3000',
         'https://aim-backend.servbay.demo',
         'https://aimchurch.vercel.app',
-        'https://aim-backend-cbiu.onrender.com'
+        'https://aim-backend-cbiu.onrender.com',
+        'https://aim-church-busan.github.io',
     ],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
